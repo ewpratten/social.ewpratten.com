@@ -57,7 +57,7 @@ services:
 
   setup:
     image: jointakahe/takahe
-    restart: no
+    restart: "no"
     env_file:
       - secure.env
       - common.env

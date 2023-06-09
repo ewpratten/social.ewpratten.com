@@ -2,33 +2,59 @@ version: "3"
 
 services:
 
-  backend:
-    image: superseriousbusiness/gotosocial:latest
+  mastodon:
+    image: lscr.io/linuxserver/mastodon:glitch
     restart: unless-stopped
-    user: 1000:1000
+    depends_on:
+      - db
+      - redis
     env_file:
       - secure.env
     environment:
-      # ActitivyPub
-      GTS_HOST: social.ewpratten.com
-      GTS_ACCOUNT_DOMAIN: ewpratten.com
-      # Database
-      GTS_DB_TYPE: sqlite
-      GTS_DB_ADDRESS: /gotosocial/storage/sqlite.db
-      # HTTP
-      GTS_LETSENCRYPT_ENABLED: false
-      GTS_PROTOCOL: http
-      # GTS_TRUSTED_PROXIES: 172.96.0.3
+      # ActivityPub
+      LOCAL_DOMAIN: ewpratten.com
+      WEB_DOMAIN: social.ewpratten.com
+      # Databases
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: mastodon
+      DB_NAME: mastodon
+      # Optional Featues
+      ES_ENABLED: false
+      S3_ENABLED: false
       # SMTP
-      GTS_SMTP_HOST: smtp.ewpratten.com
-      GTS_SMTP_PORT: 587
-      GTS_SMTP_USERNAME: social@ewpratten.com
-      GTS_SMTP_FROM: social@ewpratten.com
-      GTS_SMTP_DISCLOSE_RECIPIENTS: true
+      SMTP_SERVER: smtp.ewpratten.com
+      SMTP_PORT: 587
+      SMTP_LOGIN: social@ewpratten.com
+      SMTP_FROM_ADDRESS: social@ewpratten.com
     volumes:
-      - ./data:/gotosocial/storage
+      - ./mastodon/config:/config
     networks:
       - internal
+
+  db:
+    restart: always
+    image: postgres:14-alpine
+    shm_size: 256mb
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+    volumes:
+      - ./mastodon/postgres14:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_DB=mastodon
+      - POSTGRES_USER=mastodon
+      - POSTGRES_PASSWORD=MdDbP4ss
+
+  redis:
+    restart: always
+    image: redis:7-alpine
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+    volumes:
+      - ./mastodon/redis:/data
 
   cloudflared:
     image: cloudflare/cloudflared

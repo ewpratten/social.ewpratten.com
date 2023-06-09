@@ -24,6 +24,7 @@ services:
       # Optional Featues
       ES_ENABLED: false
       S3_ENABLED: false
+      SINGLE_USER_MODE: true
       # SMTP
       SMTP_SERVER: smtp.migadu.com
       SMTP_PORT: 587

@@ -26,7 +26,8 @@ services:
       S3_ENABLED: false
       # SMTP
       SMTP_SERVER: smtp.ewpratten.com
-      SMTP_PORT: 587
+      SMTP_PORT: 465
+      SMTP_ENABLE_STARTTLS_AUTO: false
       SMTP_LOGIN: "social%40ewpratten.com"
       SMTP_FROM_ADDRESS: social@ewpratten.com
     volumes:

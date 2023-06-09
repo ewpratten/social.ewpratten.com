@@ -26,8 +26,8 @@ services:
       S3_ENABLED: false
       # SMTP
       SMTP_SERVER: smtp.migadu.com
-      SMTP_PORT: 465
-      SMTP_LOGIN: "social%40ewpratten.com"
+      SMTP_PORT: 587
+      SMTP_LOGIN: "social@ewpratten.com"
       SMTP_FROM_ADDRESS: social@ewpratten.com
     volumes:
       - ./mastodon/config:/config

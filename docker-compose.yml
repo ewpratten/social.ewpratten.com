@@ -5,6 +5,7 @@ services:
   backend:
     image: superseriousbusiness/gotosocial:latest
     restart: unless-stopped
+    user: 1000:1000
     env_file:
       - secure.env
     environment:

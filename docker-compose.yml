@@ -18,7 +18,7 @@ services:
       # HTTP
       GTS_LETSENCRYPT_ENABLED: false
       GTS_PROTOCOL: http
-      GTS_TRUSTED_PROXIES: "cloudflared"
+      GTS_TRUSTED_PROXIES: 172.96.0.3
       # SMTP
       GTS_SMTP_HOST: smtp.ewpratten.com
       GTS_SMTP_PORT: 587
@@ -28,7 +28,8 @@ services:
     volumes:
       - ./data:/gotosocial/storage
     networks:
-      - internal
+      internal:
+        ipv4_address: 172.96.0.2
 
   cloudflared:
     image: cloudflare/cloudflared
@@ -37,7 +38,13 @@ services:
     env_file:
       - secure.env
     networks:
-      - internal
+      internal:
+        ipv4_address: 172.96.0.3
 
 networks:
   internal:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.96.0.0/24
+          gateway: 172.96.0.1

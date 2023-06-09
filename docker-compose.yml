@@ -2,72 +2,32 @@ version: "3"
 
 services:
 
-  web:
-    image: jointakahe/takahe
+  backend:
+    image: superseriousbusiness/gotosocial:latest
     restart: unless-stopped
     env_file:
       - secure.env
-      - common.env
-    volumes:
-      - ./media:/data/media
-    depends_on:
-      - database
-    networks:
-      - internal
-
-  worker:
-    image: jointakahe/takahe
-    restart: unless-stopped
-    env_file:
-      - secure.env
-      - common.env
-    volumes:
-      - ./media:/data/media
-    command: python3 manage.py runstator
-    depends_on:
-      - database
-    networks:
-      - internal
-
-  media_cdn:
-    image: sebp/lighttpd
-    restart: unless-stopped
-    volumes:
-      - ./media:/var/www/media
-      - ./config/lighttpd.conf:/etc/lighttpd/lighttpd.conf
-    tty: true
-    networks:
-      - internal
-
-  database:
-    restart: always
-    image: postgres:14-alpine
-    shm_size: 256mb
-    env_file:
-      - secure.env
-    healthcheck:
-      test: [ 'CMD', 'pg_isready', '-U', 'postgres' ]
-    volumes:
-      - ./database:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=takahe
-      - POSTGRES_DB=takahe
-    networks:
-      - internal
-
-  setup:
-    image: jointakahe/takahe
-    restart: "no"
-    env_file:
-      - secure.env
-      - common.env
+      # ActitivyPub
+      GTS_HOST: social.ewpratten.com
+      GTS_ACCOUNT_DOMAIN: ewpratten.com
+      # Database
+      GTS_DB_TYPE: sqlite
+      GTS_DB_ADDRESS: /gotosocial/storage/sqlite.db
+      # HTTP
+      GTS_LETSENCRYPT_ENABLED: false
+      GTS_PROTOCOL: http
+      GTS_TRUSTED_PROXIES: "cloudflared"
+      # SMTP
+      GTS_SMTP_HOST: smtp.ewpratten.com
+      GTS_SMTP_PORT: 587
+      GTS_SMTP_USERNAME: social@ewpratten.com
+      GTS_SMTP_FROM: social@ewpratten.com
+      GTS_SMTP_DISCLOSE_RECIPIENTS: true
     volumes:
-      - ./media:/data/media
-    depends_on:
-      - database
+      - ./data:/gotosocial/storage
     networks:
       - internal
-    command: bash -c "/takahe/manage.py migrate && /takahe/manage.py collectstatic --noinput"
 
   cloudflared:
     image: cloudflare/cloudflared

@@ -2,72 +2,65 @@ version: "3"
 
 services:
 
-  web:
-    image: jointakahe/takahe
+  mastodon:
+    image: lscr.io/linuxserver/mastodon:glitch
     restart: unless-stopped
+    depends_on:
+      - db
+      - redis
     env_file:
       - secure.env
-      - common.env
+    environment:
+      # ActivityPub
+      LOCAL_DOMAIN: ewpratten.com
+      WEB_DOMAIN: social.ewpratten.com
+      # Databases
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: mastodon
+      DB_NAME: mastodon
+      # Optional Featues
+      ES_ENABLED: false
+      S3_ENABLED: false
+      SINGLE_USER_MODE: true
+      # SMTP
+      SMTP_SERVER: smtp.migadu.com
+      SMTP_PORT: 587
+      SMTP_LOGIN: "social@ewpratten.com"
+      SMTP_FROM_ADDRESS: social@ewpratten.com
     volumes:
-      - ./media:/data/media
-    depends_on:
-      - database
+      - ./mastodon/config:/config
     networks:
       - internal
 
-  worker:
-    image: jointakahe/takahe
-    restart: unless-stopped
-    env_file:
-      - secure.env
-      - common.env
-    volumes:
-      - ./media:/data/media
-    command: python3 manage.py runstator
-    depends_on:
-      - database
-    networks:
-      - internal
-
-  media_cdn:
-    image: sebp/lighttpd
-    restart: unless-stopped
-    volumes:
-      - ./media:/var/www/media
-      - ./config/lighttpd.conf:/etc/lighttpd/lighttpd.conf
-    tty: true
-    networks:
-      - internal
-
-  database:
+  db:
     restart: always
     image: postgres:14-alpine
     shm_size: 256mb
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+    volumes:
+      - ./mastodon/postgres14:/var/lib/postgresql/data
     env_file:
       - secure.env
-    healthcheck:
-      test: [ 'CMD', 'pg_isready', '-U', 'postgres' ]
-    volumes:
-      - ./database:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=takahe
-      - POSTGRES_DB=takahe
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - POSTGRES_DB=mastodon
+      - POSTGRES_USER=mastodon
     networks:
       - internal
 
-  setup:
-    image: jointakahe/takahe
-    restart: "no"
-    env_file:
-      - secure.env
-      - common.env
+  redis:
+    restart: always
+    image: redis:7-alpine
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
     volumes:
-      - ./media:/data/media
-    depends_on:
-      - database
+      - ./mastodon/redis:/data
     networks:
       - internal
-    command: bash -c "/takahe/manage.py migrate && /takahe/manage.py collectstatic --noinput"
 
   cloudflared:
     image: cloudflare/cloudflared

@@ -21,7 +21,6 @@ services:
       DB_PORT: 5432
       DB_USER: mastodon
       DB_NAME: mastodon
-      DB_PASS: ${POSTGRES_PASSWORD}
       # Optional Featues
       ES_ENABLED: false
       S3_ENABLED: false

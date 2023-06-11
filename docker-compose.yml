@@ -23,13 +23,20 @@ services:
       DB_NAME: mastodon
       # Optional Featues
       ES_ENABLED: false
-      S3_ENABLED: false
       SINGLE_USER_MODE: true
       # SMTP
       SMTP_SERVER: smtp.migadu.com
       SMTP_PORT: 587
       SMTP_LOGIN: "social@ewpratten.com"
       SMTP_FROM_ADDRESS: social@ewpratten.com
+      # Object Storage
+      S3_ENABLED: false
+      # S3_ALIAS_HOST: social-cdn.ewpratten.com
+      # S3_BUCKET: social-cdn
+      # S3_ENDPOINT: https://ddc0f8101374c7bf29ab528eefc435ec.r2.cloudflarestorage.com/
+      # S3_PROTOCOL: https
+      # S3_PERMISSION: private
+
     volumes:
       - ./mastodon/config:/config
     networks:
